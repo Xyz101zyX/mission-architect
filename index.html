@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MISSION ARCHITECT — Design. Manage. Fly. Survive.</title>
+<style>
+:root{--bg:#0E2629;--card:#14363A;--teal:#1DA8BB;--cyan:#5FD6DE;--ink:#E4F5F4;--mut:#A9C7C5;--warn:#FFB020;--bad:#FF5A5A;--good:#3DDC84}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Arial,sans-serif}
+header{padding:18px 20px;border-bottom:1px solid #1E4A4E;display:flex;justify-content:space-between;align-items:center}
+h1{margin:0;font-size:22px;letter-spacing:.5px}h1 span{color:var(--cyan)}p{color:var(--mut);line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding:18px}.card{background:var(--card);border:1px solid #22565B;border-radius:16px;padding:18px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan)}select,input{width:100%;padding:12px;border-radius:10px;border:1px solid #2A6A70;background:#0E2629;color:white;font-size:15px;margin-top:6px}
+button{background:var(--teal);color:white;border:0;padding:13px 18px;border-radius:12px;font-weight:800;cursor:pointer;font-size:15px}button.secondary{background:#244A4E}button:disabled{opacity:.5}
+.bars{display:grid;grid-template-columns:1fr 1fr;gap:10px}.bar{background:#0E2629;padding:10px;border-radius:12px}.bar b{display:flex;justify-content:space-between}.track{height:10px;background:#23484C;border-radius:99px;overflow:hidden;margin-top:6px}.fill{height:100%;background:var(--cyan)}
+.pill{display:inline-block;padding:6px 10px;border-radius:99px;background:#0E2629;border:1px solid #2A6A70;font-size:12px;margin:3px}.ok{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.log{background:#0A1F22;border-radius:12px;padding:12px;max-height:240px;overflow:auto;font-size:14px;line-height:1.6}.hidden{display:none}.big{font-size:34px;margin:6px 0}.small{font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}@media(max-width:700px){.kpis{grid-template-columns:1fr 1fr}}.kpi{background:#0E2629;padding:12px;border-radius:12px;text-align:center}.kpi b{font-size:22px}
+</style></head>
+<body>
+<header><div><h1>MISSION <span>ARCHITECT</span></h1><div class="small">Design. Manage. Fly. Survive. — NASA Space Apps 2026 • Space Mission Design Game</div></div><div class="pill">PUBLIC DEMO • NO LOGIN</div></header>
+<div class="wrap">
+<div class="card"><p><b style="color:white">You are not the pilot. You are the architect who decides if the crew comes home.</b> Design a complete mission, manage oxygen, water, food, CO2, power, mass, spares and radiation, then face the debrief. Real NASA baselines: O2 0.84 kg / person / day, CO2 1.00 kg, water 2.28 kg, food 0.62 kg. Delta-V: Tsiolkovsky rocket equation. Orion: 4 crew up to 21 days. Radiation career limit: 600 mSv.</p></div>
+
+<!-- STEP 1 -->
+<div class="card" id="stepDesign"><h2>1 — DESIGN</h2><div class="grid">
+<div><label>Destination</label><select id="dest"><option value="LEO">LEO — Low Earth Orbit • 14 days • Delta-V 9.4 km/s</option><option value="MOON">Moon — Lunar Orbit • 21 days • Delta-V 13.5 km/s</option><option value="MARS">Mars — Low Mars Orbit • 540 days • Delta-V 15.4 km/s</option></select></div>
+<div><label>Crew</label><select id="crew"><option value="2">2 crew</option><option value="4" selected>4 crew</option><option value="6">6 crew</option></select></div>
+<div><label>Spacecraft</label><select id="ship"><option value="Capsule">Capsule — light, 21-day limit</option><option value="Habitat">Habitat — heavy, +recycling</option><option value="Cargo">Cargo + Habitat — heavy, +spares</option></select></div>
+<div><label>Propulsion — OPHIDIAN VI is ONE option</label><select id="prop"><option value="Chemical">Chemical — fast, high mass</option><option value="Electric">Electric — slow, low mass, high efficiency</option><option value="Nuclear Thermal">Nuclear Thermal — fast, medium mass</option><option value="OPHIDIAN VI">OPHIDIAN VI — HYPOTHETICAL — HYPOTHETICAL / FICTIONAL parameters for gameplay only, not validated</option></select></div>
+<div><label>Life Support</label><select id="eclss"><option value="Open">Open Loop — simple, heavy consumables</option><option value="Partial">Partial Recycling — 80% water recovery</option><option value="Closed" selected>Closed Loop — 95% water recovery, needs spares</option></select></div>
+<div><label>Spare Parts / ORUs</label><select id="spares"><option value="0">0 spares — risky</option><option value="2">2 spares — balanced</option><option value="4" selected>4 spares — safe, heavy</option></select></div>
+</div>
+<div style="margin-top:14px"><button onclick="lockDesign()">Lock Design → Go to MANAGE</button> <span class="small" id="designSummary"></span></div></div>
+
+<!-- STEP 2 -->
+<div class="card hidden" id="stepManage"><h2>2 — MANAGE <span class="pill" id="dayLabel">Day 1</span></h2>
+<div class="kpis"><div class="kpi"><div class="small">MISSION DAY</div><b id="kDay">1</b></div><div class="kpi"><div class="small">DELTA-V NEED</div><b id="kDV">—</b></div><div class="kpi"><div class="small">MASS PENALTY</div><b id="kMass">—</b></div><div class="kpi"><div class="small">RADIATION DOSE</div><b id="kRad">0 mSv</b></div></div>
+<div class="bars" style="margin-top:12px">
+<div class="bar"><b><span>Oxygen O2</span><span id="vO2"></span></b><div class="track"><div class="fill" id="bO2"></div></div></div>
+<div class="bar"><b><span>CO2 — lower is better</span><span id="vCO2"></span></b><div class="track"><div class="fill" id="bCO2" style="background:#FFB020"></div></div></div>
+<div class="bar"><b><span>Water</span><span id="vWater"></span></b><div class="track"><div class="fill" id="bWater"></div></div></div>
+<div class="bar"><b><span>Food</span><span id="vFood"></span></b><div class="track"><div class="fill" id="bFood"></div></div></div>
+<div class="bar"><b><span>Power</span><span id="vPower"></span></b><div class="track"><div class="fill" id="bPower" style="background:#3DDC84"></div></div></div>
+<div class="bar"><b><span>Mass Margin</span><span id="vMass"></span></b><div class="track"><div class="fill" id="bMass"></div></div></div>
+<div class="bar"><b><span>Spares / ORUs</span><span id="vSpares"></span></b><div class="track"><div class="fill" id="bSpares" style="background:#FFB020"></div></div></div>
+<div class="bar"><b><span>Radiation Shield</span><span id="vShield"></span></b><div class="track"><div class="fill" id="bShield" style="background:#FF5A5A"></div></div></div>
+</div>
+<p><b style="color:white">Choose ONE action per day:</b></p>
+<div><button onclick="act('recycle')">♻️ Repair / Recycle ECLSS</button> <button class="secondary" onclick="act('ration')">🍽️ Ration Food + Water</button> <button class="secondary" onclick="act('spare')">🔧 Use 1 Spare (ORU)</button> <button class="secondary" onclick="act('shield')">🛡️ Add Shielding / Shelter</button></div>
+<div class="log" id="log" style="margin-top:12px">Design locked. Day 1 begins. Watch CO2 and Radiation — they kill silently.</div>
+<div style="margin-top:12px"><button onclick="fly()">FLY → Debrief</button> <span class="small">You can fly early, but a short mission scores less. Long missions need logistics.</span></div></div>
+
+<!-- STEP 3 -->
+<div class="card hidden" id="stepDebrief"><h2>3 — DEBRIEF</h2><div class="big" id="verdict">—</div><p id="debriefText"></p><div id="scoreBox"></div><div style="margin-top:12px"><button onclick="location.reload()">↻ Design Another Mission</button></div>
+<p class="small">Sources: NASA-STD-3001 / BVAD metabolic baselines, NASA Glenn Beginner's Guide to Propulsion, Tsiolkovsky rocket equation, Orion 21-day / 4-crew consumables, NASA radiation career limit 600 mSv. Delta-V values are indicative Hohmann / public-map values. Game art is original.</p></div>
+</div>
+<script>
+let S={day:1,totalDays:21,crew:4,dose:0,spares:4,vals:{O2:85,CO2:15,Water:85,Food:85,Power:85,Mass:80,Spares:80,Shield:70},dead:false,events:0};
+const DEST={LEO:{days:14,dv:"9.4 km/s",rad:0.5},MOON:{days:21,dv:"13.5 km/s",rad:1.4},MARS:{days:540,dv:"15.4 km/s",rad:1.8}};
+const EVENTS=[
+"⚠️ CO2 scrubber degraded. CO2 +18. Repair it or use a spare.",
+"☀️ Solar particle event! Radiation dose jumps. Shelter helps.",
+"💧 Water pump leak. Water -15. Recycling can recover part.",
+"🔋 Solar array dust / shadow. Power -12.",
+"🍽️ Food packaging failure. Food -10. Ration to stretch it.",
+"🔧 ORU failure: ECLSS fan. Use a spare or O2 will fall faster.",
+"✅ Quiet day. Crew morale high. Systems stable.",
+"📡 Cargo delay. No resupply this week. Your spares matter now."
+];
+function lockDesign(){
+ const dest=document.getElementById('dest').value, crew=+document.getElementById('crew').value, ship=document.getElementById('ship').value, prop=document.getElementById('prop').value, eclss=document.getElementById('eclss').value, spares=+document.getElementById('spares').value;
+ S.crew=crew; S.spares=spares; S.totalDays=DEST[dest].days; S.dest=dest; S.prop=prop; S.ship=ship; S.eclss=eclss;
+ S.vals.Spares = spares===0?15:spares===2?55:85;
+ document.getElementById('designSummary').innerHTML=`<b class="ok">Locked:</b> ${dest} • ${crew} crew • ${ship} • ${prop} • ${eclss} • ${spares} spares • ${S.totalDays} days`;
+ document.getElementById('kDV').textContent=DEST[dest].dv;
+ document.getElementById('kMass').textContent=(ship==='Capsule'?'Low':ship==='Habitat'?'Medium':'High')+" mass";
+ document.getElementById('stepDesign').classList.add('hidden'); document.getElementById('stepManage').classList.remove('hidden'); update(); log(`Design locked: ${dest}, ${crew} crew, ${ship}, ${prop}. Mission: ${S.totalDays} days.`);
+ if(prop==="OPHIDIAN VI") log("OPHIDIAN VI selected: experimental propulsion. Balanced mass / time. It does NOT fix life support — ECLSS still decides survival.");
+ if(S.totalDays>21 && ship==='Capsule') log("⚠️ WARNING: Capsule is rated ~21 days. A long mission in a capsule without recycling is very risky.");
+}
+function update(){
+ for(const k of Object.keys(S.vals)){ document.getElementById('v'+k).textContent=Math.max(0,Math.round(S.vals[k]))+'%'; document.getElementById('b'+k).style.width=Math.max(0,Math.min(100,S.vals[k]))+'%'; }
+ document.getElementById('kDay').textContent=S.day; document.getElementById('kRad').textContent=Math.round(S.dose)+' mSv'; document.getElementById('dayLabel').textContent='Day '+S.day+' / '+S.totalDays;
+ document.getElementById('vSpares').textContent=S.spares+' left';
+}
+function log(t){ const el=document.getElementById('log'); el.innerHTML+='<br>• '+t; el.scrollTop=el.scrollHeight; }
+function act(kind){
+ if(S.dead) return;
+ // daily consumption — NASA baselines scaled to game
+ const crewF=S.crew/4;
+ S.vals.O2 -= 6*crewF; S.vals.Water -= 5*crewF; S.vals.Food -= 4*crewF; S.vals.CO2 += 7*crewF; S.vals.Power -= 2;
+ S.dose += (DEST[S.dest]?.rad||0.5) * (S.vals.Shield>60?0.7:1.2);
+ if(kind==='recycle'){ S.vals.Water+=14; S.vals.O2+=10; S.vals.CO2-=16; log("♻️ ECLSS repaired / recycled. Water + O2 up, CO2 down."); }
+ if(kind==='ration'){ S.vals.Food+=10; S.vals.Water+=8; S.vals.O2-=2; log("🍽️ Rationed. Food + Water stretched, crew tired."); }
+ if(kind==='spare'){ if(S.spares>0){ S.spares--; S.vals.CO2-=20; S.vals.O2+=12; S.vals.Power+=10; S.vals.Spares=Math.max(0,S.vals.Spares-22); log("🔧 Used 1 ORU spare. Critical system restored. Spares left: "+S.spares); } else log("❌ No spares left! You cannot fix this failure."); }
+ if(kind==='shield'){ S.vals.Shield+=15; S.vals.Mass-=4; log("🛡️ Extra shielding / shelter. Radiation dose per day reduced, mass margin down."); }
+ // random event every 2-3 days
+ if(S.day%2===0){ const e=EVENTS[Math.floor(Math.random()*EVENTS.length)]; S.events++; log(e);
+   if(e.includes('CO2')) S.vals.CO2+=10; if(e.includes('Radiation')||e.includes('Solar')) S.dose+=18; if(e.includes('leak')) S.vals.Water-=10; if(e.includes('Power')||e.includes('Solar array')) S.vals.Power-=8; if(e.includes('Food')) S.vals.Food-=8; if(e.includes('ORU')) S.vals.O2-=8;
+ }
+ S.day++;
+ if(S.vals.O2<=0||S.vals.Water<=0||S.vals.Food<=0||S.vals.CO2>=100){ S.dead=true; log("💀 MISSION FAILURE — a life-support limit was reached."); fly(); return; }
+ if(S.dose>=600){ S.dead=true; log("💀 MISSION FAILURE — 600 mSv career radiation limit exceeded."); fly(); return; }
+ if(S.day>S.totalDays){ log("🏁 Planned duration reached. Time to debrief."); fly(); return; }
+ update();
+}
+function fly(){
+ document.getElementById('stepManage').classList.add('hidden'); document.getElementById('stepDebrief').classList.remove('hidden');
+ const survived=!S.dead; const score=Math.round((survived?60:0)+Math.min(30,S.day/S.totalDays*30)+Math.max(0,S.vals.O2*0.05+S.vals.Water*0.05)-S.events*1+ (S.prop==='OPHIDIAN VI'?5:0));
+ document.getElementById('verdict').textContent=survived? "✅ CREW CAME HOME — Mission Success":"💀 CREW DID NOT COME HOME — Mission Failure";
+ document.getElementById('verdict').style.color=survived?'#3DDC84':'#FF5A5A';
+ document.getElementById('debriefText').innerHTML=`Mission: <b style="color:white">${S.dest||'—'}</b> • ${S.crew} crew • ${S.ship||''} • ${S.prop||''} • ${S.eclss||''}<br>Survived ${Math.min(S.day,S.totalDays)} / ${S.totalDays} days • Radiation dose: ${Math.round(S.dose)} mSv (limit 600 mSv) • Events faced: ${S.events} • Spares left: ${S.spares}<br><br>${survived?'Your architecture worked because you balanced mass, recycling, spares, and shielding — not just thrust.':'A life-support limit was reached. In real missions, this is why ECLSS, spares, and logistics are designed first — thrust second.'}`;
+ document.getElementById('scoreBox').innerHTML=`<div class="kpi"><div class="small">MISSION SCORE</div><b>${Math.max(0,Math.min(100,score))} / 100</b></div><p class="small">Score = survival + days completed + final O2 / Water + OPHIDIAN VI bonus (if used) − events. Try a different architecture to beat it.</p>`;
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+</script><footer style="text-align:center; padding:18px; font-size:12px; color:#A9C7C5; border-top:1px solid #1E4A4E; margin-top:20px;">
+  Game art is AI-generated. No NASA branding used.<br>
+  SI-generated images are labeled as SI-generated. All NASA data used is public educational / technical reference data. No NASA logos, flags, or mission identifiers were used or modified.<br><br>
+  OPHIDIAN VI parameters in this game are HYPOTHETICAL and for gameplay comparison only. They are not validated propulsion data. All other baselines (O2, CO2, water, food, Orion, radiation, Tsiolkovsky) use public NASA references.
+</footer>
+</body></html>
