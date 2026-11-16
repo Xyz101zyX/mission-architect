@@ -1,2 +1,2 @@
-# mission-architect
-MISSION ARCHITECT - Design. Manage. Fly. Survive. NASA Space Apps 2026
+🏆 NASA Space Apps Challenge 2026 — Galactic Problem Solver
+Project: MISSION ARCHITECT
